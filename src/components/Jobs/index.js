@@ -27,6 +27,7 @@ class Jobs extends Component {
     searchInput: '',
     activeSalaryRangeId: '',
     employmentTypesChecked: [],
+    locationsChecked: [],
   }
 
   componentDidMount() {
@@ -48,18 +49,35 @@ class Jobs extends Component {
     this.setState({employmentTypesChecked: updatedList}, this.getJobs)
   }
 
+  updateLocationsTypesChecked = typeId => {
+    const {locationsChecked} = this.state
+    let updatedList = locationsChecked
+    if (locationsChecked.includes(typeId)) {
+      updatedList = locationsChecked.filter(eachType => eachType !== typeId)
+    } else {
+      updatedList = [...updatedList, typeId]
+    }
+
+    this.setState({locationsChecked: updatedList}, this.getJobs)
+  }
+
   updateSalaryRangeId = activeSalaryRangeId =>
     this.setState({activeSalaryRangeId}, this.getJobs)
 
   getJobs = async () => {
     this.setState({jobsApiStatus: apiStatusConstants.inProgress})
 
-    const {activeSalaryRangeId, employmentTypesChecked, searchInput} =
-      this.state
+    const {
+      activeSalaryRangeId,
+      employmentTypesChecked,
+      searchInput,
+      locationsChecked,
+    } = this.state
 
     const employTypes = employmentTypesChecked.join(',')
+    const locationTypes = locationsChecked.join(',')
     const jwtToken = Cookies.get('jwt_token')
-    const apiUrl = `https://apis.ccbp.in/jobs?employment_type=${employTypes}&minimum_package=${activeSalaryRangeId}&search=${searchInput}`
+    const apiUrl = `https://apis.ccbp.in/jobs?employment_type=${employTypes}&minimum_package=${activeSalaryRangeId}&search=${searchInput}&location=${locationTypes}`
 
     const options = {
       headers: {
@@ -122,22 +140,22 @@ class Jobs extends Component {
   renderSearchBar = searchBarID => {
     const {searchInput} = this.state
     return (
-      <div className="search-bar" id={searchBarID}>
+      <div className='search-bar' id={searchBarID}>
         <input
-          className="search-input"
-          type="search"
-          placeholder="Search"
+          className='search-input'
+          type='search'
+          placeholder='Search'
           value={searchInput}
           onChange={e => this.setState({searchInput: e.target.value})}
         />
         <button
-          aria-label="Save"
-          className="search-button"
-          type="button"
-          data-testid="searchButton"
+          aria-label='Save'
+          className='search-button'
+          type='button'
+          data-testid='searchButton'
           onClick={() => this.getJobs()}
         >
-          <BsSearch className="search-icon" />
+          <BsSearch className='search-icon' />
         </button>
       </div>
     )
@@ -149,35 +167,38 @@ class Jobs extends Component {
       profileApiStatus,
       activeSalaryRangeId,
       employmentTypesChecked,
+      locationsChecked,
     } = this.state
     return (
-      <div className="side-bar">
+      <div className='side-bar'>
         {this.renderSearchBar('smallSearchBar')}
         <ProfileDetails
           profileDetails={profileDetails}
           profileApiStatus={profileApiStatus}
           getProfileDetails={this.getProfileDetails}
         />
-        <hr className="separator" />
+        <hr className='separator' />
         <FiltersGroup
           updateSalaryRangeId={this.updateSalaryRangeId}
           activeSalaryRangeId={activeSalaryRangeId}
           updateEmploymentTypesChecked={this.updateEmploymentTypesChecked}
           employmentTypesChecked={employmentTypesChecked}
+          locationsChecked={locationsChecked}
+          updateLocationsTypesChecked={this.updateLocationsTypesChecked}
         />
       </div>
     )
   }
 
   renderNoJobsView = () => (
-    <div className="no-jobs-container">
+    <div className='no-jobs-container'>
       <img
-        src="https://assets.ccbp.in/frontend/react-js/no-jobs-img.png"
-        alt="no jobs"
-        className="no-jobs-image"
+        src='https://assets.ccbp.in/frontend/react-js/no-jobs-img.png'
+        alt='no jobs'
+        className='no-jobs-image'
       />
-      <h1 className="no-jobs-heading">No Jobs Found</h1>
-      <p className="no-jobs-description">
+      <h1 className='no-jobs-heading'>No Jobs Found</h1>
+      <p className='no-jobs-description'>
         We could not find any jobs. Try other filters.
       </p>
     </div>
@@ -188,7 +209,7 @@ class Jobs extends Component {
     return (
       <>
         {jobsList.length > 0 ? (
-          <ul className="jobs-list">
+          <ul className='jobs-list'>
             {jobsList.map(eachJob => (
               <JobCard key={eachJob.id} jobDetails={eachJob} />
             ))}
@@ -201,25 +222,25 @@ class Jobs extends Component {
   }
 
   renderJobsLoaderView = () => (
-    <div className="jobs-loader-container" data-testid="loader">
-      <Loader type="ThreeDots" color="#ffffff" height="50" width="50" />
+    <div className='jobs-loader-container' data-testid='loader'>
+      <Loader type='ThreeDots' color='#ffffff' height='50' width='50' />
     </div>
   )
 
   renderJobsApiFailureView = () => (
-    <div className="jobs-api-failure-container">
+    <div className='jobs-api-failure-container'>
       <img
-        src="https://assets.ccbp.in/frontend/react-js/failure-img.png"
-        alt="failure view"
-        className="job-api-failure-image"
+        src='https://assets.ccbp.in/frontend/react-js/failure-img.png'
+        alt='failure view'
+        className='job-api-failure-image'
       />
-      <h1 className="failure-view-heading">Oops! Something Went Wrong</h1>
-      <p className="failure-view-description">
+      <h1 className='failure-view-heading'>Oops! Something Went Wrong</h1>
+      <p className='failure-view-description'>
         We cannot seem to find the page you are looking for.
       </p>
       <button
-        type="button"
-        className="retry-button"
+        type='button'
+        className='retry-button'
         onClick={() => this.getJobs()}
       >
         Retry
@@ -244,11 +265,11 @@ class Jobs extends Component {
 
   render() {
     return (
-      <div className="jobs-page-container">
+      <div className='jobs-page-container'>
         <Header />
-        <div className="jobs-page">
+        <div className='jobs-page'>
           {this.renderSideBar()}
-          <div className="jobs-container">
+          <div className='jobs-container'>
             {this.renderSearchBar('largeSearchBar')}
             {this.renderJobsBasedOnAPiStatus()}
           </div>
